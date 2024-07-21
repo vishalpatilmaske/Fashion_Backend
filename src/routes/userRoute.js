@@ -6,32 +6,25 @@ import {
   deleteSingleUser,
   deleteAllUsers,
   loginUser,
-  //   logoutUser,
-  //   requestPasswordReset,
-  //   resetPassword,
   addAddress,
   updateAddress,
   deleteAddress,
 } from "../controllers/userController.js";
-
 import encryptPassword from "../middleware/encryptPassword.js";
 
 const router = express.Router();
 
-//  route for user login
+// Route for user login
 router.post("/", encryptPassword, createUser);
 router.get("/", getAllUsers);
 router.get("/:id", getSingleUser);
 router.delete("/:id", deleteSingleUser);
 router.delete("/", deleteAllUsers);
 
-// routes for signup / signin
+// Routes for signup/signin
 router.post("/login", loginUser);
-// router.post("/logout", logoutUser);
-// router.post("/forgot-password", requestPasswordReset);
-// router.post("/reset-password", resetPassword);
 
-// routes for user address
+// Routes for user address
 router.post("/:id/address", addAddress);
 router.patch("/:id/address/:addressId", updateAddress);
 router.delete("/:id/address/:addressId", deleteAddress);
