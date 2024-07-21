@@ -1,122 +1,106 @@
 import User from "../models/userModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
+import { handleError } from "../utils/handleError.js";
 
-// controller to create user
+// Controller to create user
 export const createUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    const isexist = await User.findOne({ email });
+    const isExist = await User.findOne({ email });
 
-    if (isexist) {
-      return res.status(400).json({ message: "User already exist" });
+    if (isExist) {
+      return handleError(res, 400, "User already exists");
     }
 
     const user = new User({ email, password });
 
     await user.save();
 
-    res.status(201).json(user);
+    res.status(201).json({ success: true, data: user });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    handleError(res, 400, error.message);
   }
 };
 
-// controller to get all users in database
-
+// Controller to get all users in database
 export const getAllUsers = async (req, res) => {
   try {
     const users = await User.find({});
 
     if (users.length === 0) {
-      return res
-        .status(404)
-        .json({ message: "No users found in the database." });
+      return handleError(res, 404, "No users found in the database.");
     }
 
-    res.status(200).json(users);
+    res.status(200).json({ success: true, data: users });
   } catch (error) {
-    console.error("Error fetching users:", error.message);
-    res.status(500).json({ error: "An error occurred while fetching users." });
+    handleError(res, 500, "An error occurred while fetching users.");
   }
 };
 
-// get single user
-
+// Get single user
 export const getSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
 
     const user = await User.findById(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return handleError(res, 404, "User not found.");
     }
-    console.log("user deleted successfully");
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error("Error fetching user by ID:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while fetching the user." });
+    handleError(res, 500, "An error occurred while fetching the user.");
   }
 };
 
-// delete user
-
+// Delete single user
 export const deleteSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
     const user = await User.findByIdAndDelete(id);
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return handleError(res, 404, "User not found");
     }
 
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error("Error deleting user by ID:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while deleteing the user." });
+    handleError(res, 500, "An error occurred while deleting the user.");
   }
 };
 
-// delete all users
-
+// Delete all users
 export const deleteAllUsers = async (req, res) => {
   try {
     const result = await User.deleteMany({});
     if (result.deletedCount === 0) {
-      return res.status(404).json({ message: "No users found to delete." });
+      return handleError(res, 404, "No users found to delete.");
     }
     res
       .status(200)
       .json({ message: `${result.deletedCount} users deleted successfully.` });
   } catch (error) {
-    console.error("Error deleting users:", error.message);
-    res.status(500).json({ error: "An error occurred while deleting users." });
+    handleError(res, 500, "An error occurred while deleting users.");
   }
 };
 
-// login user
+// Login user
 export const loginUser = async (req, res) => {
   try {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res
-        .status(400)
-        .json({ message: "Email and password are required" });
+      return handleError(res, 400, "Email and password are required");
     }
 
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      return handleError(res, 404, "User not found");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      return handleError(res, 400, "Invalid credentials");
     }
 
     // Generate JWT
@@ -130,47 +114,40 @@ export const loginUser = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ token });
+    res.status(200).json({ success: true, token });
   } catch (error) {
-    console.error("Error logging in user:", error.message);
-    res.status(500).json({ error: "Server error" });
+    handleError(res, 500, "Server error");
   }
 };
 
-// add address
+// Add address
 export const addAddress = async (req, res) => {
   try {
     const { id } = req.params;
     const { mobile, pincode, housenumber, city, landmark, dist } = req.body;
 
-    // if any one field was missing then disply message
+    // If any one field was missing then display message
     if (!mobile || !pincode || !housenumber || !city || !landmark || !dist) {
-      return res
-        .status(400)
-        .json({ message: "All address fields are required." });
+      return handleError(res, 400, "All address fields are required.");
     }
 
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return handleError(res, 404, "User not found.");
     }
 
     user.address.push({ mobile, pincode, housenumber, city, landmark, dist });
 
     await user.save();
 
-    res.status(200).json(user);
+    res.status(200).json({ success: true, data: user });
   } catch (error) {
-    console.error("Error adding address:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while adding the address." });
+    handleError(res, 500, "An error occurred while adding the address.");
   }
 };
 
-// update address
-
+// Update address
 export const updateAddress = async (req, res) => {
   try {
     const { id, addressId } = req.params;
@@ -179,13 +156,13 @@ export const updateAddress = async (req, res) => {
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return handleError(res, 404, "User not found.");
     }
 
     const address = user.address.id(addressId);
 
     if (!address) {
-      return res.status(404).json({ message: "Address not found." });
+      return handleError(res, 404, "Address not found.");
     }
 
     if (mobile !== undefined) address.mobile = mobile;
@@ -197,48 +174,41 @@ export const updateAddress = async (req, res) => {
 
     await user.save();
 
-    res.status(200).json(address);
+    res.status(200).json({ success: true, data: address });
   } catch (error) {
-    console.error("Error updating address:", error.message);
-    res
-      .status(500)
-      .json({ error: "An error occurred while updating the address." });
+    handleError(res, 500, "An error occurred while updating the address.");
   }
 };
 
-// delete address
-
+// Delete address
 export const deleteAddress = async (req, res) => {
   try {
     const { id, addressId } = req.params;
 
     if (!id || !addressId) {
-      return res
-        .status(400)
-        .json({ message: "User ID and address ID are required." });
+      return handleError(res, 400, "User ID and address ID are required.");
     }
 
     const user = await User.findById(id);
 
     if (!user) {
-      return res.status(404).json({ message: "User not found." });
+      return handleError(res, 404, "User not found.");
     }
 
     const address = user.address.id(addressId);
 
     if (!address) {
-      return res.status(404).json({ message: "Address not found." });
+      return handleError(res, 404, "Address not found.");
     }
 
     user.address.pull(addressId);
 
     await user.save();
 
-    res.status(200).json({ message: "Address deleted successfully." });
-  } catch (error) {
-    console.error("Error deleting address:", error.message);
     res
-      .status(500)
-      .json({ error: "An error occurred while deleting the address." });
+      .status(200)
+      .json({ success: true, message: "Address deleted successfully." });
+  } catch (error) {
+    handleError(res, 500, "An error occurred while deleting the address.");
   }
 };
