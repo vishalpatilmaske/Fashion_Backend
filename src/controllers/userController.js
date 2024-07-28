@@ -18,7 +18,9 @@ export const createUser = async (req, res) => {
 
     await user.save();
 
-    res.status(201).json({ success: true, data: user });
+    res
+      .status(201)
+      .json({ success: true, message: "Registration successful!", data: user });
   } catch (error) {
     handleError(res, 400, error.message);
   }

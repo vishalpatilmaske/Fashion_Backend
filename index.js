@@ -4,8 +4,12 @@ import bodyParser from "body-parser";
 import userRouter from "./src/routes/userRoute.js";
 import productRouter from "./src/routes/productRoute.js";
 import cartRouter from "./src/routes/cartRoute.js";
+import cors from "cors";
 
 const app = express();
+
+// cross origin resource sharing
+app.use(cors());
 
 // Connect to the database
 connectDB();
