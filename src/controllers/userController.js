@@ -117,20 +117,20 @@ export const loginUser = async (req, res) => {
       return handleError(res, 400, "Invalid password");
     }
 
-    // Generate JWT
+    // Generate JWT and store in client browser
     const payload = {
-      user: {
-        user,
-      },
+      id: user.id,
+      email: user.email,
     };
-
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1h",
+      expiresIn: "24h",
     });
 
-    res
-      .status(200)
-      .json({ success: true, message: "User login Successfully", token });
+    res.cookie("access_key", token, {
+      httpOnly: true,
+    });
+
+    res.status(200).json({ success: true, message: "User login Successfully" });
   } catch (error) {
     handleError(res, 500, "Server error");
   }

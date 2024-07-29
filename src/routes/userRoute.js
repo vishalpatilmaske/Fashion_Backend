@@ -11,6 +11,7 @@ import {
   deleteAddress,
 } from "../controllers/userController.js";
 import encryptPassword from "../middleware/encryptPassword.js";
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -22,7 +23,7 @@ router.delete("/:id", deleteSingleUser);
 router.delete("/", deleteAllUsers);
 
 // Routes for signup/signin
-router.post("/login", loginUser);
+router.post("/login", auth, loginUser);
 
 // Routes for user address
 router.post("/:id/address", addAddress);
