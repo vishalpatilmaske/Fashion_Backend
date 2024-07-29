@@ -26,7 +26,9 @@ export const createUser = async (req, res) => {
     const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "24h",
     });
-    res.cookie("access_key", token);
+    res.cookie("access_key", token, {
+      httpOnly: true,
+    });
 
     res
       .status(201)
