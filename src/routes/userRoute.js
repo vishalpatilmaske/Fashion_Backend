@@ -15,7 +15,7 @@ import encryptPassword from "../middleware/encryptPassword.js";
 const router = express.Router();
 
 // Route for user login
-router.post("/", encryptPassword, createUser);
+router.post("/signup", encryptPassword, createUser);
 router.get("/", getAllUsers);
 router.get("/:id", getSingleUser);
 router.delete("/:id", deleteSingleUser);

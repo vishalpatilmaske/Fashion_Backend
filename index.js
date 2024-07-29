@@ -5,11 +5,13 @@ import userRouter from "./src/routes/userRoute.js";
 import productRouter from "./src/routes/productRoute.js";
 import cartRouter from "./src/routes/cartRoute.js";
 import cors from "cors";
+import cookieParser from "cookie-parser";
 
 const app = express();
 
-// cross origin resource sharing
+// middlwares
 app.use(cors());
+app.use(cookieParser());
 
 // Connect to the database
 connectDB();

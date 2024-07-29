@@ -14,9 +14,19 @@ export const createUser = async (req, res) => {
       return handleError(res, 400, "User already exists");
     }
 
+    // Create a new user
     const user = new User({ email, password });
-
     await user.save();
+
+    // Generate JWT and store in client browser
+    const payload = {
+      id: user.id,
+      email: user.email,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+    res.cookie("access_key", token);
 
     res
       .status(201)
@@ -102,13 +112,13 @@ export const loginUser = async (req, res) => {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) {
-      return handleError(res, 400, "Invalid credentials");
+      return handleError(res, 400, "Invalid password");
     }
 
     // Generate JWT
     const payload = {
       user: {
-        id: user.id,
+        user,
       },
     };
 
@@ -116,7 +126,9 @@ export const loginUser = async (req, res) => {
       expiresIn: "1h",
     });
 
-    res.status(200).json({ success: true, token });
+    res
+      .status(200)
+      .json({ success: true, message: "User login Successfully", token });
   } catch (error) {
     handleError(res, 500, "Server error");
   }
