@@ -30,6 +30,8 @@ export const createUser = async (req, res) => {
       httpOnly: true,
     });
 
+    // set the password undefined
+    user.password = undefined;
     res
       .status(201)
       .json({ success: true, message: "Registration successful!", data: user });
@@ -130,7 +132,11 @@ export const loginUser = async (req, res) => {
       httpOnly: true,
     });
 
-    res.status(200).json({ success: true, message: "User login Successfully" });
+    // set the password undefiend
+    user.password = undefined;
+    res
+      .status(200)
+      .json({ success: true, message: "User login Successfully", data: user });
   } catch (error) {
     handleError(res, 500, "Server error");
   }
