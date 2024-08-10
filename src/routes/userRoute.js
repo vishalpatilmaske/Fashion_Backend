@@ -18,12 +18,12 @@ const router = express.Router();
 // Route for user login
 router.post("/signup", encryptPassword, createUser);
 router.get("/", getAllUsers);
-router.get("/:id", getSingleUser);
+router.get("/:id", auth, getSingleUser);
 router.delete("/:id", deleteSingleUser);
 router.delete("/", deleteAllUsers);
 
 // Routes for signup/signin
-router.post("/login", auth, loginUser);
+router.post("/login", loginUser);
 
 // Routes for user address
 router.post("/:id/address", addAddress);

@@ -74,7 +74,7 @@ export const deleteSingleProduct = async (req, res) => {
     if (!product) {
       return handleError(res, 404, "Product not found");
     }
-    res.status(200).json({ success: true, data: {} });
+    res.status(200).json({ success: true, data: product });
   } catch (error) {
     handleError(res, 500, error.message);
   }
@@ -83,7 +83,7 @@ export const deleteSingleProduct = async (req, res) => {
 // Delete all products
 export const deleteAllProducts = async (req, res) => {
   try {
-    const result = await Product.deleteMany();
+    const result = await Product.deleteMany({});
     res.status(200).json({ success: true, data: result });
   } catch (error) {
     handleError(res, 500, error.message);

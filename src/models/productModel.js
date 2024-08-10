@@ -17,6 +17,11 @@ const productSchema = new mongoose.Schema(
       required: [true, "Product price is required"],
       min: [0, "Price cannot be negative"],
     },
+    size: {
+      type: String,
+      require: [true, "Product size is required"],
+      values: ["M", "S", "L", "XL", "XXL"],
+    },
     image: {
       type: String,
       required: [true, "Product image is required"],

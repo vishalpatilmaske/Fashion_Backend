@@ -28,6 +28,8 @@ export const createUser = async (req, res) => {
     });
     res.cookie("access_key", token, {
       httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
     });
 
     // set the password undefined
@@ -37,6 +39,49 @@ export const createUser = async (req, res) => {
       .json({ success: true, message: "Registration successful!", data: user });
   } catch (error) {
     handleError(res, 400, error.message);
+  }
+};
+// Login user
+export const loginUser = async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return handleError(res, 400, "Email and password are required");
+    }
+
+    const user = await User.findOne({ email });
+    if (!user) {
+      return handleError(res, 404, "User not found");
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return handleError(res, 400, "Invalid password");
+    }
+
+    // Generate JWT and store in client browser
+    const payload = {
+      id: user.id,
+      email: user.email,
+    };
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "24h",
+    });
+
+    res.cookie("access_key", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "Strict",
+    });
+
+    // set the password undefiend
+    user.password = undefined;
+    res
+      .status(200)
+      .json({ success: true, message: "User login Successfully", data: user });
+  } catch (error) {
+    handleError(res, 500, "Server error");
   }
 };
 
@@ -59,7 +104,7 @@ export const getAllUsers = async (req, res) => {
 export const getSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
-
+    console.log(id);
     const user = await User.findById(id);
     if (!user) {
       return handleError(res, 404, "User not found.");
@@ -97,48 +142,6 @@ export const deleteAllUsers = async (req, res) => {
       .json({ message: `${result.deletedCount} users deleted successfully.` });
   } catch (error) {
     handleError(res, 500, "An error occurred while deleting users.");
-  }
-};
-
-// Login user
-export const loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-
-    if (!email || !password) {
-      return handleError(res, 400, "Email and password are required");
-    }
-
-    const user = await User.findOne({ email });
-    if (!user) {
-      return handleError(res, 404, "User not found");
-    }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return handleError(res, 400, "Invalid password");
-    }
-
-    // Generate JWT and store in client browser
-    const payload = {
-      id: user.id,
-      email: user.email,
-    };
-    const token = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "24h",
-    });
-
-    res.cookie("access_key", token, {
-      httpOnly: true,
-    });
-
-    // set the password undefiend
-    user.password = undefined;
-    res
-      .status(200)
-      .json({ success: true, message: "User login Successfully", data: user });
-  } catch (error) {
-    handleError(res, 500, "Server error");
   }
 };
 

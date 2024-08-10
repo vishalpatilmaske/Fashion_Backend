@@ -3,7 +3,7 @@ import { handleError } from "../utils/handleError.js";
 
 const auth = (req, res, next) => {
   const token = req.cookies.access_key;
-
+  console.log(token);
   if (!token) {
     return handleError(res, 401, "Access denied ,token missing!");
   } else {
@@ -11,6 +11,7 @@ const auth = (req, res, next) => {
       if (err) {
         return handleError(res, 401, "Token is not valid");
       } else {
+        console.log(decoded);
         req.user = decoded;
         next();
       }
