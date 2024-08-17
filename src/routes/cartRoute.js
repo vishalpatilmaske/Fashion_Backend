@@ -5,14 +5,16 @@ import {
   addItemToCart,
   removeItemFromCart,
   clearCart,
-} from "../controllers/cartController.js"; // Adjust the path as necessary
+  updateItemFromCart,
+} from "../controllers/cartController.js";
 
 const router = express.Router();
 
 router.post("/", createCart);
-router.get("/:userId", getCartByUserId);
-router.patch("/:userId/add", addItemToCart);
+router.get("/:cartId", getCartByUserId);
+router.post("/:cartId/add", addItemToCart);
 router.patch("/:userId/remove", removeItemFromCart);
 router.delete("/:userId/clear", clearCart);
+router.patch("/:cartId/update", updateItemFromCart);
 
 export default router;
