@@ -1,7 +1,10 @@
-import mongoose from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-const addressSchema = new mongoose.Schema(
+const addressSchema = new Schema(
   {
+    fullname: {
+      type: String,
+    },
     mobile: {
       type: Number,
     },
@@ -11,7 +14,7 @@ const addressSchema = new mongoose.Schema(
     housenumber: {
       type: Number,
     },
-    city: {
+    area: {
       type: String,
     },
     landmark: {
@@ -24,11 +27,8 @@ const addressSchema = new mongoose.Schema(
   { _id: true }
 );
 
-const userSchema = new mongoose.Schema(
+const userSchema = new Schema(
   {
-    name: {
-      type: String,
-    },
     email: {
       type: String,
       unique: true,

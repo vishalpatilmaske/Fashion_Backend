@@ -4,9 +4,9 @@ import bodyParser from "body-parser";
 import userRouter from "./src/routes/userRoute.js";
 import productRouter from "./src/routes/productRoute.js";
 import cartRouter from "./src/routes/cartRoute.js";
+import orderRouter from "./src/routes/orderRoute.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-
 const app = express();
 
 // middlwares
@@ -28,6 +28,7 @@ app.use(bodyParser.json());
 app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/cart", cartRouter);
+app.use("/order", orderRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is running on the port " + (process.env.PORT || 3000));

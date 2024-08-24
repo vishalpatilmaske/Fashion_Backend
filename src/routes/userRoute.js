@@ -18,7 +18,7 @@ const router = express.Router();
 // Route for user login
 router.post("/signup", encryptPassword, createUser);
 router.get("/", getAllUsers);
-router.get("/:id", auth, getSingleUser);
+router.get("/:id", getSingleUser);
 router.delete("/:id", deleteSingleUser);
 router.delete("/", deleteAllUsers);
 

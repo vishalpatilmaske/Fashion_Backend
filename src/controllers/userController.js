@@ -52,7 +52,7 @@ export const loginUser = async (req, res) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return handleError(res, 404, "User not found");
+      return handleError(res, 404, "Invalid Credential !");
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
@@ -75,7 +75,7 @@ export const loginUser = async (req, res) => {
       sameSite: "Strict",
     });
 
-    // set the password undefiend
+    // set the password undefiend to secure password
     user.password = undefined;
     res
       .status(200)
@@ -104,7 +104,6 @@ export const getAllUsers = async (req, res) => {
 export const getSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(id);
     const user = await User.findById(id);
     if (!user) {
       return handleError(res, 404, "User not found.");
@@ -149,24 +148,58 @@ export const deleteAllUsers = async (req, res) => {
 export const addAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const { mobile, pincode, housenumber, city, landmark, dist } = req.body;
+    const { fullname, mobile, pincode, housenumber, area, landmark, dist } =
+      req.body;
 
-    // If any one field was missing then display message
-    if (!mobile || !pincode || !housenumber || !city || !landmark || !dist) {
+    // If any one field is missing, return an error
+    if (
+      !fullname ||
+      !mobile ||
+      !pincode ||
+      !housenumber ||
+      !area ||
+      !landmark ||
+      !dist
+    ) {
       return handleError(res, 400, "All address fields are required.");
     }
 
-    const user = await User.findById(id);
+    // Convert relevant fields to numbers
+    const mobileNumber = Number(mobile);
+    const pincodeNumber = Number(pincode);
+    const houseNumber = Number(housenumber);
 
+    // Validate that the conversion was successful
+    if (isNaN(mobileNumber) || isNaN(pincodeNumber) || isNaN(houseNumber)) {
+      return handleError(
+        res,
+        400,
+        "Invalid data type for mobile, pincode, or housenumber."
+      );
+    }
+
+    const user = await User.findById(id);
     if (!user) {
       return handleError(res, 404, "User not found.");
     }
 
-    user.address.push({ mobile, pincode, housenumber, city, landmark, dist });
+    user.address.push({
+      fullname,
+      mobile: mobileNumber,
+      pincode: pincodeNumber,
+      housenumber: houseNumber,
+      area,
+      landmark,
+      dist,
+    });
 
     await user.save();
 
-    res.status(200).json({ success: true, data: user });
+    res.status(200).json({
+      success: true,
+      data: user,
+      message: "Address added successfully",
+    });
   } catch (error) {
     handleError(res, 500, "An error occurred while adding the address.");
   }
@@ -208,9 +241,9 @@ export const updateAddress = async (req, res) => {
 // Delete address
 export const deleteAddress = async (req, res) => {
   try {
-    const { id, addressId } = req.params;
+    const { userId, addressId } = req.params;
 
-    if (!id || !addressId) {
+    if (!userId || !addressId) {
       return handleError(res, 400, "User ID and address ID are required.");
     }
 

@@ -46,7 +46,6 @@ export const addItemToCart = async (req, res) => {
   try {
     const { cartId } = req.params;
     const { productId, quantity } = req.body;
-    console.log(cartId);
     const cart = await Cart.findById(cartId);
     if (!cart) return handleError(res, 404, "Cart not found");
 
@@ -106,10 +105,10 @@ export const updateItemFromCart = async (req, res) => {
 //remove item from cart
 export const removeItemFromCart = async (req, res) => {
   try {
-    const { userId } = req.params;
+    const { cartId } = req.params;
     const { productId } = req.body;
 
-    const cart = await Cart.findOne({ userId });
+    const cart = await Cart.findById(cartId);
     if (!cart) return handleError(res, 404, "Cart not found");
 
     // to remove the item fileter the cart and only take the products that id not match with the remove product item
