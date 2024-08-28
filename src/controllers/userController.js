@@ -108,6 +108,7 @@ export const getSingleUser = async (req, res) => {
     if (!user) {
       return handleError(res, 404, "User not found.");
     }
+    user.password = undefined;
     res.status(200).json({ success: true, data: user });
   } catch (error) {
     handleError(res, 500, "An error occurred while fetching the user.");
@@ -148,10 +149,18 @@ export const deleteAllUsers = async (req, res) => {
 export const addAddress = async (req, res) => {
   try {
     const { id } = req.params;
-    const { fullname, mobile, pincode, housenumber, area, landmark, dist } =
-      req.body;
+    const {
+      fullname,
+      mobile,
+      pincode,
+      housenumber,
+      area,
+      landmark,
+      dist,
+      primaryaddress,
+    } = req.body;
 
-    // If any one field is missing, return an error
+    // Validate that all required fields are provided
     if (
       !fullname ||
       !mobile ||
@@ -178,11 +187,20 @@ export const addAddress = async (req, res) => {
       );
     }
 
+    // Find the user by ID
     const user = await User.findById(id);
     if (!user) {
       return handleError(res, 404, "User not found.");
     }
 
+    // If the new address is set as the delivery address, update other addresses
+    if (primaryaddress) {
+      user.address.forEach((addr) => {
+        addr.primaryaddress = false;
+      });
+    }
+
+    // Add the new address to the user's address array
     user.address.push({
       fullname,
       mobile: mobileNumber,
@@ -191,8 +209,10 @@ export const addAddress = async (req, res) => {
       area,
       landmark,
       dist,
+      primaryaddress: Boolean(primaryaddress),
     });
 
+    // Save the updated user document
     await user.save();
 
     res.status(200).json({

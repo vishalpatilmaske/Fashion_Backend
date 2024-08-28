@@ -23,6 +23,9 @@ const addressSchema = new Schema(
     dist: {
       type: String,
     },
+    primaryaddress: {
+      type: Boolean,
+    },
   },
   { _id: true }
 );
