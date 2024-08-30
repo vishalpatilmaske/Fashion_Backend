@@ -27,7 +27,7 @@ router.post("/login", loginUser);
 
 // Routes for user address
 router.post("/:id/address", addAddress);
-router.patch("/:id/address/:addressId", updateAddress);
+router.patch("/:userId/update-address/:addressId", updateAddress);
 router.delete("/:id/address/:addressId", deleteAddress);
 
 export default router;

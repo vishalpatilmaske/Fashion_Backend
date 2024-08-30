@@ -228,10 +228,18 @@ export const addAddress = async (req, res) => {
 // Update address
 export const updateAddress = async (req, res) => {
   try {
-    const { id, addressId } = req.params;
-    const { mobile, pincode, housenumber, city, landmark, dist } = req.body;
+    const { userId, addressId } = req.params;
+    const {
+      mobile,
+      pincode,
+      housenumber,
+      city,
+      landmark,
+      dist,
+      primaryaddress,
+    } = req.body;
 
-    const user = await User.findById(id);
+    const user = await User.findById(userId);
 
     if (!user) {
       return handleError(res, 404, "User not found.");
@@ -249,6 +257,15 @@ export const updateAddress = async (req, res) => {
     if (city !== undefined) address.city = city;
     if (landmark !== undefined) address.landmark = landmark;
     if (dist !== undefined) address.dist = dist;
+    if (primaryaddress !== undefined) {
+      // If the new address is set as the delivery address, update other addresses
+      if (primaryaddress) {
+        user.address.forEach((addr) => {
+          addr.primaryaddress = false;
+        });
+      }
+      address.primaryaddress = Boolean(primaryaddress);
+    }
 
     await user.save();
 

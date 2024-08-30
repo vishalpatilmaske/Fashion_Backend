@@ -1,94 +1,81 @@
+import { handleError } from "../utils/handleError.js";
 import Order from "../models/orderModel.js";
-import { handleError } from "../utils/handleError.js"; // Import the error handler
+import User from "../models/userModel.js";
 
-// Create a new order
+// Create new order
 export const createOrder = async (req, res) => {
   try {
-    const { user, products, totalPrice } = req.body;
+    const { userId } = req.params;
+    const { products, totalPrice, orderStatus, payment, shippingAddress } =
+      req.body;
 
-    const newOrder = new Order({
-      user,
-      products,
+    // Check if the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return handleError(res, 404, "User not found");
+    }
+
+    // Validate if all required fields are provided
+    if (
+      !products ||
+      !totalPrice ||
+      !orderStatus ||
+      !payment ||
+      !shippingAddress
+    ) {
+      return handleError(res, 400, "All fields are required");
+    }
+
+    // Validate product details
+    if (!Array.isArray(products) || products.length === 0) {
+      return handleError(
+        res,
+        400,
+        "Products array is required and cannot be empty"
+      );
+    }
+
+    // Create a new order object
+    const newOrder = {
+      products: products.map((product) => ({
+        product: product.productId,
+        quantity: product.quantity,
+      })),
       totalPrice,
+      orderStatus,
+      payment: {
+        method: payment.method,
+        status: payment.status || "pending",
+        transactionId: payment.transactionId || null,
+      },
+      isPaid: payment.status === "successful",
+      shippingAddress,
+    };
+
+    // Check if an order document exists for the user
+    let userOrder = await Order.findOne({ user: userId });
+
+    if (userOrder) {
+      // If the order document exists, push the new order into the orders array
+      userOrder.orders.push(newOrder);
+    } else {
+      // If no order document exists, create a new one and add the order to the orders array
+      userOrder = new Order({
+        user: userId,
+        orders: [newOrder],
+      });
+    }
+
+    // Save the order to the database
+    const savedOrder = await userOrder.save();
+
+    // Send a success response with the saved order
+    return res.status(201).json({
+      message: "Order created successfully",
+      order: savedOrder,
     });
-
-    await newOrder.save();
-    res.status(201).json(newOrder);
   } catch (error) {
-    console.error("Error creating order:", error);
-    handleError(res, 500, "Internal Server Error");
-  }
-};
-
-// Get all orders
-export const getAllOrders = async (req, res) => {
-  try {
-    const orders = await Order.find()
-      .populate("user")
-      .populate("products.product");
-    res.status(200).json(orders);
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    handleError(res, 500, "Internal Server Error");
-  }
-};
-
-// Get an order by ID
-export const getOrderById = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const order = await Order.findById(id)
-      .populate("user")
-      .populate("products.product");
-
-    if (!order) {
-      return handleError(res, 404, "Order not found");
-    }
-
-    res.status(200).json(order);
-  } catch (error) {
-    console.error("Error fetching order by ID:", error);
-    handleError(res, 500, "Internal Server Error");
-  }
-};
-
-// Update order status
-export const updateOrderStatus = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { status } = req.body;
-
-    const order = await Order.findById(id);
-
-    if (!order) {
-      return handleError(res, 404, "Order not found");
-    }
-
-    order.status = status;
-    await order.save();
-
-    res.status(200).json(order);
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    handleError(res, 500, "Internal Server Error");
-  }
-};
-
-// Delete an order
-export const deleteOrder = async (req, res) => {
-  try {
-    const { id } = req.params;
-
-    const order = await Order.findById(id);
-
-    if (!order) {
-      return handleError(res, 404, "Order not found");
-    }
-
-    await order.remove();
-    res.status(200).json({ message: "Order deleted successfully" });
-  } catch (error) {
-    console.error("Error deleting order:", error);
-    handleError(res, 500, "Internal Server Error");
+    console.log("Internal Server Error:", error.message);
+    return handleError(res, 500, "Internal server error");
   }
 };

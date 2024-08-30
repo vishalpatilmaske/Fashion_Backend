@@ -28,7 +28,7 @@ app.use(bodyParser.json());
 app.use("/user", userRouter);
 app.use("/product", productRouter);
 app.use("/cart", cartRouter);
-app.use("/order", orderRouter);
+app.use("/api/order", orderRouter);
 
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is running on the port " + (process.env.PORT || 3000));
