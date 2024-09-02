@@ -4,13 +4,14 @@ import { handleError } from "../utils/handleError.js";
 // create cart
 export const createCart = async (req, res) => {
   try {
-    const { userId } = req.body;
-
+    const { userId } = req.params;
     // Check if the user already has a cart
-    let existingCart = await Cart.findById(userId);
+    const existingCart = await Cart.findOne({ userId: userId });
 
     if (existingCart) {
-      return res.status(409).json({ message: "Cart already exists" });
+      return res
+        .status(409)
+        .json({ message: "Cart already exists", data: existingCart });
     }
 
     // Create a new cart
@@ -102,6 +103,95 @@ export const updateItemFromCart = async (req, res) => {
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
+
+// add items to the selected cart items
+export const addSelectedItems = async (req, res) => {
+  try {
+    const { cartId } = req.params;
+    const product = req.body;
+
+    const cart = await Cart.findById(cartId);
+    if (!cart) {
+      return res.status(404).json({ message: "Cart not found" });
+    }
+
+    // Check if product is an array (for multiple products)
+    if (Array.isArray(product.productId)) {
+      product.productId.forEach((item) => {
+        cart.selectedItems.push({
+          productId: item.productId,
+          quantity: item.quantity,
+        });
+      });
+    } else if (product) {
+      cart.selectedItems.push({
+        productId: product.productId,
+        quantity: product.quantity,
+      });
+    } else {
+      return res.status(400).json({ message: "Invalid product data" });
+    }
+
+    await cart.save();
+
+    res.status(200).json({
+      message: "Selected items added successfully",
+      data: cart.selectedItems,
+    });
+  } catch (error) {
+    console.error(
+      "Error adding items to the selected cart items: ",
+      error.message
+    );
+    res.status(500).json({ message: "Internal Server Error" });
+  }
+};
+
+// get item from selected items
+export const getSelectedCartItems = async (req, res) => {
+  try {
+    const { cartId } = req.params;
+
+    const cart = await Cart.findById(cartId);
+    if (!cart) handleError(res, 404, "cart not found");
+
+    const selectedItems = cart?.selectedItems;
+
+    res.status(200).json({
+      message: "selected items get successfully",
+      data: selectedItems,
+    });
+  } catch (error) {
+    console.log("Error while geting prodcuts from select items", error.message);
+    handleError(res, 500, "Internal Server Error");
+  }
+};
+
+// Deselct cart items by id
+export const deselectSelectedCartItems = async (req, res) => {
+  try {
+    const { cartId } = req.params;
+    const { productId } = req.body;
+
+    // Check the cart
+    const cart = await Cart.findById(cartId);
+    if (!cart) return handleError(res, 404, "Cart Not Found");
+
+    // Deselect the item in the selectedItems array
+    cart.selectedItems = cart.selectedItems.filter(
+      (product) => product.productId != productId
+    );
+
+    // Save the updated cart
+    await cart.save();
+
+    res.status(200).json({ message: "Product deselected from cart", cart });
+  } catch (error) {
+    console.log("Error while deselecting cart items:", error.message);
+    handleError(res, 500, "Internal Server Error");
+  }
+};
+
 //remove item from cart
 export const removeItemFromCart = async (req, res) => {
   try {

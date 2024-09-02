@@ -21,6 +21,19 @@ const cartSchema = new Schema(
         },
       },
     ],
+    selectedItems: [
+      {
+        productId: {
+          type: Schema.Types.ObjectId,
+          ref: "Porduct",
+          required: true,
+        },
+        quantity: {
+          type: Number,
+          min: 1,
+        },
+      },
+    ],
   },
   { timestamps: true }
 );
