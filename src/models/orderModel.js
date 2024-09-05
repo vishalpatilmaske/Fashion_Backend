@@ -11,7 +11,7 @@ const orderSchema = new Schema(
       {
         products: [
           {
-            product: {
+            productId: {
               type: Schema.Types.ObjectId,
               ref: "Product",
               required: true,
@@ -56,38 +56,9 @@ const orderSchema = new Schema(
           default: false,
         },
         shippingAddress: {
-          fullName: {
-            type: String,
-            required: true,
-          },
-          area: {
-            type: String,
-            required: true,
-          },
-          flatNumber: {
-            type: Number,
-            required: true,
-          },
-          city: {
-            type: String,
-            required: true,
-          },
-          postalCode: {
-            type: String,
-            required: true,
-          },
-          country: {
-            type: String,
-            required: true,
-          },
-          landmark: {
-            type: String,
-            required: true,
-          },
-          phoneNumber: {
-            type: String,
-            required: true,
-          },
+          type: Schema.Types.ObjectId,
+          ref: "User.address",
+          required: true,
         },
         deliveredAt: {
           type: Date,

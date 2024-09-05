@@ -7,7 +7,15 @@ import cartRouter from "./src/routes/cartRoute.js";
 import orderRouter from "./src/routes/orderRoute.js";
 import cors from "cors";
 import cookieParser from "cookie-parser";
+import Razorpay from "razorpay";
+
 const app = express();
+
+// reate razorpay intence to use the razorpay
+export const razorpayInstance = new Razorpay({
+  key_id: process.env.RAZORPAY_KEY_ID,
+  key_secret: process.env.RAZORPAY_KEY_SECRET,
+});
 
 // middlwares
 app.use(

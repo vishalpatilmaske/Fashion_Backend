@@ -115,19 +115,33 @@ export const addSelectedItems = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Check if product is an array (for multiple products)
+    // Check if the incoming data is an array of products
     if (Array.isArray(product.productId)) {
       product.productId.forEach((item) => {
+        // Check if the productId already exists in selectedItems
+        const exists = cart.selectedItems.some(
+          (selectedItem) =>
+            selectedItem.productId.toString() === item.productId.toString()
+        );
+        if (!exists) {
+          cart.selectedItems.push({
+            productId: item.productId,
+            quantity: item.quantity,
+          });
+        }
+      });
+    } else if (product && product.productId) {
+      // For a single product, check if it already exists in selectedItems
+      const exists = cart.selectedItems.some(
+        (selectedItem) =>
+          selectedItem.productId.toString() === product.productId.toString()
+      );
+      if (!exists) {
         cart.selectedItems.push({
-          productId: item.productId,
-          quantity: item.quantity,
+          productId: product.productId,
+          quantity: product.quantity,
         });
-      });
-    } else if (product) {
-      cart.selectedItems.push({
-        productId: product.productId,
-        quantity: product.quantity,
-      });
+      }
     } else {
       return res.status(400).json({ message: "Invalid product data" });
     }
@@ -178,10 +192,13 @@ export const deselectSelectedCartItems = async (req, res) => {
     if (!cart) return handleError(res, 404, "Cart Not Found");
 
     // Deselect the item in the selectedItems array
-    cart.selectedItems = cart.selectedItems.filter(
-      (product) => product.productId != productId
-    );
-
+    if (productId) {
+      cart.selectedItems = cart.selectedItems.filter(
+        (product) => product.productId != productId
+      );
+    } else {
+      cart.selectedItems = [];
+    }
     // Save the updated cart
     await cart.save();
 
