@@ -41,3 +41,5 @@ app.use("/api/order", orderRouter);
 app.listen(process.env.PORT || 3000, () => {
   console.log("Server is running on the port " + (process.env.PORT || 3000));
 });
+
+export default app;
