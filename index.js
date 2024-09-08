@@ -1,4 +1,4 @@
-import express from "express";
+import express, { json } from "express";
 import connectDB from "./src/db/db.js";
 import bodyParser from "body-parser";
 import userRouter from "./src/routes/userRoute.js";
@@ -33,6 +33,9 @@ connectDB();
 app.use(bodyParser.json());
 
 // Routes
+app.use("", (req, res) => {
+  res.json({ message: "Hello from home" });
+});
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);

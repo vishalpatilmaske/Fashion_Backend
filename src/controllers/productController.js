@@ -24,6 +24,48 @@ export const createProduct = async (req, res) => {
     handleError(res, 500, error.message);
   }
 };
+// create more than one products
+export const createProducts = async (req, res) => {
+  try {
+    const products = req.body.products;
+
+    if (!products || !Array.isArray(products) || products.length === 0) {
+      return res
+        .status(400)
+        .json({ success: false, message: "Products array is required" });
+    }
+
+    const createdProducts = [];
+
+    for (let i = 0; i < products.length; i++) {
+      const { name, description, price, image, category, stock } = products[i];
+
+      if (!name || !description || !price || !image || !category || !stock) {
+        return res
+          .status(400)
+          .json({
+            success: false,
+            message: `All fields are required for product at index ${i}`,
+          });
+      }
+
+      const product = new Product({
+        name,
+        description,
+        price,
+        image,
+        category,
+        stock,
+      });
+      const savedProduct = await product.save();
+      createdProducts.push(savedProduct);
+    }
+
+    res.status(201).json({ success: true, data: createdProducts });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
 
 // Get single product
 export const getSingleProduct = async (req, res) => {
