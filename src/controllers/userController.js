@@ -6,8 +6,8 @@ import { handleError } from "../utils/handleError.js";
 // Controller to create user
 export const createUser = async (req, res) => {
   try {
+    console.log("hello");
     const { email, password } = req.body;
-
     const isExist = await User.findOne({ email });
 
     if (isExist) {

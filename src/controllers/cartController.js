@@ -23,7 +23,7 @@ export const createCart = async (req, res) => {
     await newCart.save();
     res.status(201).json(newCart);
   } catch (error) {
-    console.error("Error creating new cart:", error);
+    console.error("Error creating new cart:", error.message);
     res.status(500).json({ message: "Internal Server Error" });
   }
 };
@@ -62,9 +62,12 @@ export const addItemToCart = async (req, res) => {
 
     await cart.save();
 
-    res.status(200).json("product add successfully ", cart);
+    res.status(200).json({
+      message: "Product added successfully",
+      cart,
+    });
   } catch (error) {
-    console.error("Error adding item to cart:", error);
+    console.error("Error adding item to cart:", error.message);
     handleError(res, 500, "Internal Server Error");
   }
 };
