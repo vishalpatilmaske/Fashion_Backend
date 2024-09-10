@@ -33,9 +33,6 @@ connectDB();
 app.use(bodyParser.json());
 
 // Routes
-app.use("", (req, res) => {
-  res.json({ message: "Hello from home" });
-});
 app.use("/api/user", userRouter);
 app.use("/api/product", productRouter);
 app.use("/api/cart", cartRouter);
