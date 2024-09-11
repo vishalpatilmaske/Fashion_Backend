@@ -19,7 +19,6 @@ const productSchema = new Schema(
     },
     size: {
       type: String,
-      require: [true, "Product size is required"],
       values: ["M", "S", "L", "XL", "XXL"],
     },
     image: {

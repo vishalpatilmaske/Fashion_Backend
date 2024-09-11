@@ -39,14 +39,12 @@ export const createProducts = async (req, res) => {
 
     for (let i = 0; i < products.length; i++) {
       const { name, description, price, image, category, stock } = products[i];
-
+      console.log(products[i]);
       if (!name || !description || !price || !image || !category || !stock) {
-        return res
-          .status(400)
-          .json({
-            success: false,
-            message: `All fields are required for product at index ${i}`,
-          });
+        return res.status(400).json({
+          success: false,
+          message: `All fields are required for product at index ${i}`,
+        });
       }
 
       const product = new Product({
