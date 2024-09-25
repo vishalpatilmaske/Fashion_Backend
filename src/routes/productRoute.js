@@ -8,16 +8,16 @@ import {
   deleteAllProducts,
   createProducts,
 } from "../controllers/productController.js";
-import { isAuthenticated } from "../middleware/auth.js";
+import { isAuthenticated, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/create-product", isAuthenticated, createProduct);
-router.post("/create-products", isAuthenticated, createProducts);
+router.post("/create-product", isAuthenticated, isAdmin, createProduct);
+router.post("/create-products", isAuthenticated, isAdmin, createProducts);
 router.get("/:id", getSingleProduct);
 router.get("/", getAllProducts);
-router.patch("/:id/update", isAuthenticated, updateProductDetails);
-router.delete("/:id/delete", isAuthenticated, deleteSingleProduct);
-router.delete("/", isAuthenticated, deleteAllProducts);
+router.patch("/:id/update", isAuthenticated, isAdmin, updateProductDetails);
+router.delete("/:id/delete", isAuthenticated, isAdmin, deleteSingleProduct);
+router.delete("/", isAuthenticated, isAdmin, deleteAllProducts);
 
 export default router;

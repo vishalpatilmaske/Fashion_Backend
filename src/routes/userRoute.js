@@ -12,7 +12,7 @@ import {
   refreshAccessToken,
 } from "../controllers/userController.js";
 import encryptPassword from "../middleware/encryptPassword.js";
-import { isAuthenticated } from "../middleware/auth.js";
+import { isAuthenticated, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
@@ -22,10 +22,10 @@ router.post("/login", loginUser);
 router.post("/refresh-token", refreshAccessToken);
 
 // User management routes
-router.get("/", isAuthenticated, getAllUsers);
+router.get("/", isAuthenticated, isAdmin, getAllUsers);
 router.get("/:id/data", isAuthenticated, getSingleUser);
-router.delete("/:id", isAuthenticated, deleteSingleUser);
-router.delete("/", isAuthenticated, deleteAllUsers);
+router.delete("/:id", isAuthenticated, isAdmin, deleteSingleUser);
+router.delete("/", isAuthenticated, isAdmin, deleteAllUsers);
 
 // User address routes
 router.post("/:id/address", isAuthenticated, addAddress);
