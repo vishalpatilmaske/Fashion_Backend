@@ -1,21 +1,26 @@
 import jwt from "jsonwebtoken";
 import { handleError } from "../utils/handleError.js";
 
-const auth = (req, res, next) => {
-  const token = req.cookies.access_key;
-  console.log(token);
-  if (!token) {
-    return handleError(res, 401, "Access denied ,token missing!");
+// Middleware to check if the user is an admin
+export const isAdmin = (req, res, next) => {
+  if (req.user && req.user.role === "admin") {
+    next();
   } else {
-    jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
-      if (err) {
-        return handleError(res, 401, "Token is not valid");
-      } else {
-        console.log(decoded);
-        req.user = decoded;
-        next();
-      }
-    });
+    handleError(res, 403, "Access denied: Admins only");
   }
 };
-export default auth;
+// is authenticated
+export const isAuthenticated = (req, res, next) => {
+  const token = req.cookies.access_key;
+
+  if (!token) {
+    return handleError(res, 401, "Access token is missing");
+  }
+  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
+    if (err) {
+      return handleError(res, 403, "Invalid token");
+    }
+    req.user = user;
+    next();
+  });
+};

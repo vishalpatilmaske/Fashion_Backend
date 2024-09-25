@@ -44,6 +44,12 @@ const userSchema = new Schema(
     userimage: {
       type: String,
     },
+    refreshToken: { type: String },
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
+    },
     address: [addressSchema],
   },
   { timestamps: true }

@@ -34,11 +34,10 @@ export const getCartByUserId = async (req, res) => {
     const { cartId } = req.params;
     const cart = await Cart.findById(cartId);
     if (!cart) return handleError(res, 404, "Cart not found");
-
     res.status(200).json(cart);
   } catch (error) {
     console.error("Error fetching cart:", error);
-    handleError(res, 500, "Internal Server Error");
+    return handleError(res, 500, "Internal Server Error");
   }
 };
 

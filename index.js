@@ -20,7 +20,7 @@ export const razorpayInstance = new Razorpay({
 // middlwares
 app.use(
   cors({
-    origin: true,
+    origin: "http://localhost:5173",
     credentials: true,
   })
 );

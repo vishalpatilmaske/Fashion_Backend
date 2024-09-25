@@ -10,17 +10,29 @@ import {
   getSelectedCartItems,
   deselectSelectedCartItems,
 } from "../controllers/cartController.js";
-
+import { isAuthenticated } from "../middleware/auth.js";
 const router = express.Router();
 
-router.post("/:userId", createCart);
-router.get("/:cartId", getCartByUserId);
-router.post("/:cartId/add", addItemToCart);
-router.patch("/:cartId/remove", removeItemFromCart);
-router.delete("/:userId/clear", clearCart);
-router.post("/:cartId/add-selected-cart-items", addSelectedItems);
-router.get("/:cartId/get-selected-cart-items", getSelectedCartItems);
-router.post("/:cartId/deselect-selected-cart-items", deselectSelectedCartItems);
+router.post("/:userId", isAuthenticated, createCart);
+router.get("/:cartId", isAuthenticated, getCartByUserId);
+router.post("/:cartId/add", isAuthenticated, addItemToCart);
+router.patch("/:cartId/remove", isAuthenticated, removeItemFromCart);
+router.delete("/:userId/clear", isAuthenticated, clearCart);
+router.post(
+  "/:cartId/add-selected-cart-items",
+  isAuthenticated,
+  addSelectedItems
+);
+router.get(
+  "/:cartId/get-selected-cart-items",
+  isAuthenticated,
+  getSelectedCartItems
+);
+router.post(
+  "/:cartId/deselect-selected-cart-items",
+  isAuthenticated,
+  deselectSelectedCartItems
+);
 
-router.patch("/:cartId/update", updateItemFromCart);
+router.patch("/:cartId/update", isAuthenticated, updateItemFromCart);
 export default router;
