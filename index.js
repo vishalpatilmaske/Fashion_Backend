@@ -19,7 +19,7 @@ export const razorpayInstance = new Razorpay({
 
 // cross origin resource
 const allowedOrigins = [
-  "https://fashionflickshop.netlify.app/", // Production origin
+  "https://fashionflickshop.netlify.app", // Production origin
   "http://localhost:5173", // Development origin
 ];
 
