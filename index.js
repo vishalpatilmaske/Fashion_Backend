@@ -17,13 +17,29 @@ export const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// middlwares
+// cross origin resource
+const allowedOrigins = [
+  "http://localhost:5173", // Development origin
+  "https://fashion-backend-api.vercel.app/", // Production origin
+];
+
 app.use(
   cors({
-    origin: "http://localhost:5173",
-    credentials: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      // Check if the origin is in the allowed list
+      if (allowedOrigins.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true, // Allow credentials (cookies, etc.)
   })
 );
+
 app.use(cookieParser());
 
 // Connect to the database

@@ -66,6 +66,10 @@ const orderSchema = new Schema(
         canceledAt: {
           type: Date,
         },
+        orderDate: {
+          type: Date,
+          default: Date.now,
+        },
       },
     ],
   },

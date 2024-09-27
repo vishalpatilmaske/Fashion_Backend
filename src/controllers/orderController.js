@@ -121,3 +121,39 @@ export const createOrder = async (req, res) => {
     });
   }
 };
+// get all orders
+export const getAllOrders = async (req, res) => {
+  const { userId } = req.params;
+
+  try {
+    // Validate if the user exists
+    const isValidUser = await User.findById(userId);
+
+    if (!isValidUser) {
+      return handleError(res, 404, "User not found");
+    }
+
+    // Find all orders associated with the user
+    const orders = await Order.find({ user: userId }).populate(
+      "orders.products.productId",
+      "name price description image"
+    );
+
+    if (!orders || orders.length === 0) {
+      return handleError(res, 404, "No orders found for this user");
+    }
+
+    // If orders are found, send them in response
+    res.status(200).json({
+      success: true,
+      message: "Orders retrieved successfully",
+      data: orders,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving orders",
+      error: error.message,
+    });
+  }
+};
