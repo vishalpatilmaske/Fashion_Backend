@@ -2,6 +2,8 @@ import { razorpayInstance } from "../../index.js";
 import Order from "../models/orderModel.js";
 import User from "../models/userModel.js";
 import crypto from "crypto";
+import { handleError } from "../utils/handleError.js";
+import Product from "../models/productModel.js";
 
 // create razorpay order
 export const createRazorpayOrder = async (req, res) => {
@@ -60,57 +62,70 @@ export const verifyPayment = async (req, res) => {
   }
 };
 
+// create an order
 export const createOrder = async (req, res) => {
   try {
     const { userId } = req.params;
     const { orders } = req.body;
 
-    // Find the existing order document for the user
+    // Check if the user already has an order document
     let userOrder = await Order.findOne({ user: userId });
 
-    if (userOrder && orders) {
-      // If the order document exists, append new orders to the existing orders array
-      userOrder.orders.push(
-        ...orders.map((order) => ({
-          products: order.products.map((product) => ({
+    // To store the new orders that will be added or created
+    let newOrders = [];
+
+    // Loop through each order in the request
+    for (const order of orders) {
+      // Loop through each product in the current order's products array
+      for (const product of order.products) {
+        // geting the particular product price
+        const productId = product.productId;
+        const purchesdProduct = await Product.findById({ _id: productId });
+
+        // Create the single order for each product
+        const singleOrder = {
+          product: {
             productId: product.productId,
             quantity: product.quantity,
-          })),
-          totalPrice: order.totalPrice,
-          orderStatus: order.orderStatus,
-          payment: order.payment,
-          isPaid: order.isPaid,
+          },
+          totalPrice: purchesdProduct.price * product.quantity,
+          orderStatus: order.orderStatus || "pending",
+          payment: {
+            method: order.payment.method,
+            status: order.payment.status,
+            transactionId: order.payment.transactionId,
+          },
+          isPaid: order.isPaid || false,
           shippingAddress: order.shippingAddress,
           deliveredAt: order.deliveredAt || null,
           canceledAt: order.canceledAt || null,
-        }))
-      );
-    } else {
-      // If the order document doesn't exist, create a new one
-      userOrder = new Order({
-        user: userId,
-        orders: orders.map((order) => ({
-          products: order.products.map((product) => ({
-            productId: product.productId,
-            quantity: product.quantity,
-          })),
-          totalPrice: order.totalPrice,
-          orderStatus: order.orderStatus,
-          payment: order.payment,
-          isPaid: order.isPaid,
-          shippingAddress: order.shippingAddress,
-          deliveredAt: order.deliveredAt || null,
-          canceledAt: order.canceledAt || null,
-        })),
-      });
+        };
+
+        // If userOrder exists, push the new order to the existing orders array
+        if (userOrder) {
+          userOrder.orders.push(singleOrder);
+        } else {
+          // Otherwise, add the new single order to newOrders for later creation
+          newOrders.push(singleOrder);
+        }
+      }
     }
 
-    // Save the updated or new order document to the database
-    await userOrder.save();
+    // If userOrder already exists, save the updated document
+    if (userOrder) {
+      await userOrder.save();
+    } else {
+      // If no existing order, create a new order document for the user with new orders
+      userOrder = new Order({
+        user: userId,
+        orders: newOrders,
+      });
+      await userOrder.save();
+    }
 
     res.status(201).json({
       success: true,
-      message: "Order placed successfully",
+      message: "Order(s) placed successfully",
       order: userOrder,
     });
   } catch (error) {
@@ -121,35 +136,77 @@ export const createOrder = async (req, res) => {
     });
   }
 };
-// get all orders
-export const getAllOrders = async (req, res) => {
+
+// Get all orders of a particular user
+export const getUsersOrders = async (req, res) => {
   const { userId } = req.params;
 
   try {
     // Validate if the user exists
-    const isValidUser = await User.findById(userId);
-
-    if (!isValidUser) {
-      return handleError(res, 404, "User not found");
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
 
     // Find all orders associated with the user
-    const orders = await Order.find({ user: userId }).populate(
-      "orders.products.productId",
-      "name price description image"
-    );
+    const orders = await Order.find({ user: userId }).populate({
+      path: "orders.product.productId",
+      select: "name price description image",
+    });
 
+    // If no orders found, return a 404
     if (!orders || orders.length === 0) {
-      return handleError(res, 404, "No orders found for this user");
+      return res.status(404).json({
+        success: false,
+        message: "No orders found for this user",
+      });
     }
 
-    // If orders are found, send them in response
+    // Return the populated orders
     res.status(200).json({
       success: true,
       message: "Orders retrieved successfully",
       data: orders,
     });
   } catch (error) {
+    // Catch and return any server errors
+    res.status(500).json({
+      success: false,
+      message: "Error retrieving orders",
+      error: error.message,
+    });
+  }
+};
+
+// get all orders of the application
+export const getAllOrders = async (req, res) => {
+  try {
+    // Fetch all orders from the database
+    const orders = await Order.find()
+      .populate("user", "name email address")
+      .populate({
+        path: "orders.product.productId",
+        select: "name price description image category",
+      });
+
+    // If no orders found, return a 404
+    if (!orders || orders.length === 0) {
+      return res.status(404).json({
+        success: false,
+        message: "No orders found",
+      });
+    }
+
+    // Respond with the orders
+    res.status(200).json({
+      success: true,
+      data: orders,
+    });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({
       success: false,
       message: "Error retrieving orders",

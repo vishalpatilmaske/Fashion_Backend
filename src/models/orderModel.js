@@ -9,20 +9,18 @@ const orderSchema = new Schema(
     },
     orders: [
       {
-        products: [
-          {
-            productId: {
-              type: Schema.Types.ObjectId,
-              ref: "Product",
-              required: true,
-            },
-            quantity: {
-              type: Number,
-              required: true,
-              min: [1, "Quantity must be at least 1"],
-            },
+        product: {
+          productId: {
+            type: Schema.Types.ObjectId,
+            ref: "Product",
+            required: true,
           },
-        ],
+          quantity: {
+            type: Number,
+            required: true,
+            min: [1, "Quantity must be at least 1"],
+          },
+        },
         totalPrice: {
           type: Number,
           required: true,

@@ -10,6 +10,7 @@ import {
   updateAddress,
   deleteAddress,
   refreshAccessToken,
+  updateUser,
 } from "../controllers/userController.js";
 import encryptPassword from "../middleware/encryptPassword.js";
 import { isAuthenticated, isAdmin } from "../middleware/auth.js";
@@ -24,8 +25,9 @@ router.post("/refresh-token", refreshAccessToken);
 // User management routes
 router.get("/", isAuthenticated, isAdmin, getAllUsers);
 router.get("/:id/data", isAuthenticated, getSingleUser);
-router.delete("/:id", isAuthenticated, isAdmin, deleteSingleUser);
+router.delete("/:id", deleteSingleUser);
 router.delete("/", isAuthenticated, isAdmin, deleteAllUsers);
+router.patch("/:id/update-user", isAuthenticated, isAdmin, updateUser);
 
 // User address routes
 router.post("/:id/address", isAuthenticated, addAddress);

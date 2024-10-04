@@ -1,4 +1,6 @@
 import User from "../models/userModel.js";
+import Cart from "../models/cartModel.js";
+import Order from "../models/orderModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { handleError } from "../utils/handleError.js";
@@ -72,7 +74,7 @@ export const loginUser = async (req, res) => {
     // Generate access and refresh tokens
     const payload = { id: user.id, email: user.email, role: user.role };
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
-      expiresIn: "1d",
+      expiresIn: "7d",
     });
     const refreshToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "7d",
@@ -141,6 +143,54 @@ export const refreshAccessToken = async (req, res) => {
   });
 };
 
+// update users details
+export const updateUser = async (req, res) => {
+  const userId = req.params.id;
+  const { email, password, userimage, address, role } = req.body;
+  ``;
+  try {
+    // Find the user by ID
+    let user = await User.findById(userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    // Update user fields if they are provided
+    if (email) user.email = email;
+
+    // If password is provided, hash it and update
+    if (password) {
+      const salt = await bcrypt.genSalt(10);
+      user.password = await bcrypt.hash(password, salt);
+    }
+
+    if (userimage) user.userimage = userimage;
+
+    // Update the role if provided
+    if (role && ["user", "admin"].includes(role)) {
+      user.role = role;
+    }
+
+    // Update the address if provided
+    if (address && address.length > 0) {
+      user.address = address;
+    }
+
+    // Save the updated user
+    const updatedUser = await user.save();
+
+    // Return the updated user data (excluding the password for security reasons)
+    const { password: _, ...updatedUserData } = updatedUser.toObject();
+    return res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUserData,
+    });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({ message: "Server error", error });
+  }
+};
 // Controller to get all users in database
 export const getAllUsers = async (req, res) => {
   try {
@@ -176,14 +226,36 @@ export const getSingleUser = async (req, res) => {
 export const deleteSingleUser = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Step 1: Delete the user by ID
     const user = await User.findByIdAndDelete(id);
     if (!user) {
-      return handleError(res, 404, "User not found");
+      return res.status(404).json({
+        success: false,
+        message: "User not found",
+      });
     }
+    const userId = id;
 
-    res.status(200).json({ success: true, data: user });
+    // Step 2: Delete associated cart(s) by user ID
+    const cartResult = await Cart.deleteMany({ userId });
+
+    // Step 3: Delete associated order(s) by user ID
+    const orderResult = await Order.deleteMany({ user: userId });
+
+    res.status(200).json({
+      success: true,
+      message: "User and associated data deleted successfully!",
+      deletedUser: user,
+      deletedCarts: cartResult.deletedCount,
+      deletedOrders: orderResult.deletedCount,
+    });
   } catch (error) {
-    handleError(res, 500, "An error occurred while deleting the user.");
+    console.error("Error deleting user:", error);
+    return res.status(500).json({
+      success: false,
+      message: "An error occurred while deleting the user and associated data.",
+    });
   }
 };
 

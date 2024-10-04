@@ -72,7 +72,7 @@ export const getSingleProduct = async (req, res) => {
     if (!product) {
       return handleError(res, 404, "Product not found");
     }
-    res.status(200).json({ success: true, data: product });
+    return res.status(200).json({ success: true, data: product });
   } catch (error) {
     handleError(res, 500, error.message);
   }
@@ -82,7 +82,7 @@ export const getSingleProduct = async (req, res) => {
 export const getAllProducts = async (req, res) => {
   try {
     const products = await Product.find();
-    res.status(200).json({ success: true, data: products });
+    return res.status(200).json({ success: true, data: products });
   } catch (error) {
     handleError(res, 500, error.message);
   }
@@ -101,7 +101,7 @@ export const updateProductDetails = async (req, res) => {
     if (!product) {
       return handleError(res, 404, "Product not found");
     }
-    res.status(200).json({ success: true, data: product });
+    return res.status(200).json({ success: true, data: product });
   } catch (error) {
     handleError(res, 500, error.message);
   }
@@ -114,7 +114,7 @@ export const deleteSingleProduct = async (req, res) => {
     if (!product) {
       return handleError(res, 404, "Product not found");
     }
-    res.status(200).json({ success: true, data: product });
+    return res.status(200).json({ success: true, data: product });
   } catch (error) {
     handleError(res, 500, error.message);
   }
@@ -124,7 +124,7 @@ export const deleteSingleProduct = async (req, res) => {
 export const deleteAllProducts = async (req, res) => {
   try {
     const result = await Product.deleteMany({});
-    res.status(200).json({ success: true, data: result });
+    return res.status(200).json({ success: true, data: result });
   } catch (error) {
     handleError(res, 500, error.message);
   }
