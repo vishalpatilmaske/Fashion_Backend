@@ -23,7 +23,7 @@ router.post("/login", loginUser);
 router.post("/refresh-token", refreshAccessToken);
 
 // User management routes
-router.get("/", isAuthenticated, isAdmin, getAllUsers);
+router.get("/", isAuthenticated, getAllUsers);
 router.get("/:id/data", isAuthenticated, getSingleUser);
 router.delete("/:id", deleteSingleUser);
 router.delete("/", isAuthenticated, isAdmin, deleteAllUsers);

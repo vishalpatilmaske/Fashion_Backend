@@ -73,6 +73,7 @@ export const loginUser = async (req, res) => {
 
     // Generate access and refresh tokens
     const payload = { id: user.id, email: user.email, role: user.role };
+
     const accessToken = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
@@ -85,28 +86,17 @@ export const loginUser = async (req, res) => {
 
     await user.save();
 
-    res.cookie("access_key", accessToken, {
-      httpOnly: true,
-      // secure: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict",
-    });
-    res.cookie("refresh_key", refreshToken, {
-      httpOnly: true,
-      // secure: true,
-      sameSite: "Strict",
-    });
-
-    // Set password undefined to secure password
     user.password = undefined;
+
     res.status(200).json({
       success: true,
       message: "User login successfully",
       data: user,
       accessToken: accessToken,
+      refreshToken: refreshToken,
     });
   } catch (error) {
-    handleError(res, 500, "Server error");
+    handleError(res, 500, "Server error " + error.message);
   }
 };
 // refresh the access token when it was expire
