@@ -214,3 +214,36 @@ export const getAllOrders = async (req, res) => {
     });
   }
 };
+
+// delete the user order
+export const deleteOrder = async (req, res) => {
+  try {
+    const { userId, orderId } = req.params;
+
+    // Find the user's order document by userId
+    const userOrders = await Order.findOne({ user: userId });
+    if (!userOrders) {
+      return handleError(res, 404, "Orders for the user not found");
+    }
+
+    // Find the order to be deleted in the orders array
+    const orderIndex = userOrders.orders.findIndex(
+      (order) => order._id.toString() === orderId
+    );
+
+    if (orderIndex === -1) {
+      return handleError(res, 404, "Order not found");
+    }
+
+    // Remove the order from the array
+    userOrders.orders.splice(orderIndex, 1);
+
+    // Save the updated order document
+    await userOrders.save();
+
+    res.status(200).json({ message: "Order cancelled successfully" });
+  } catch (error) {
+    console.error(error);
+    return handleError(res, 500, "Server error");
+  }
+};
