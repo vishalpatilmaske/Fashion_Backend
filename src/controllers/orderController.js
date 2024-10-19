@@ -106,6 +106,7 @@ export const createOrder = async (req, res) => {
           });
         }
 
+        console.log(product);
         // Create the single order for each product
         const singleOrder = {
           product: {
