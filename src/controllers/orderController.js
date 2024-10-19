@@ -78,6 +78,14 @@ export const createOrder = async (req, res) => {
     for (const order of orders) {
       // Loop through each product in the current order's products array
       for (const product of order.products) {
+        // check the prodcutId and the product quantity are present or not
+        if (!product.productId || !product.quantity) {
+          return res.status(400).json({
+            success: false,
+            message: "Product ID and quantity are required for all products.",
+          });
+        }
+
         // geting the particular product price
         const productId = product.productId;
         const purchesdProduct = await Product.findById({ _id: productId });
