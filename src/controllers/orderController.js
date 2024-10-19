@@ -109,7 +109,7 @@ export const createOrder = async (req, res) => {
         // Create the single order for each product
         const singleOrder = {
           product: {
-            productId: productId,
+            productId: product.productId,
             quantity: product.quantity,
           },
           totalPrice: purchasedProduct.price * product.quantity,
@@ -125,23 +125,19 @@ export const createOrder = async (req, res) => {
           canceledAt: order.canceledAt || null,
         };
 
-        console.log("single order", singleOrder);
-
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
-          const data = userOrder.orders.push(singleOrder);
-          console.log(data);
+          console.log(singleOrder.product);
+          userOrder.orders.push(singleOrder);
         } else {
           // Otherwise, add the new single order to newOrders for later creation
           newOrders.push(singleOrder);
         }
       }
     }
-    console.log("test", userOrder);
 
     // If userOrder already exists, save the updated document
     if (userOrder) {
-      console.log("vishal", userOrder.orders[0]?.products);
       await userOrder.save();
     } else {
       // If no existing order, create a new order document for the user with new orders

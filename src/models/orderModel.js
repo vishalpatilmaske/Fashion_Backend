@@ -13,12 +13,12 @@ const orderSchema = new Schema(
           productId: {
             type: Schema.Types.ObjectId,
             ref: "Product",
-            // required: true,
+            required: true,
             default: null,
           },
           quantity: {
             type: Number,
-            // required: true,
+            required: true,
             min: [1, "Quantity must be at least 1"],
             default: 1,
           },
