@@ -86,11 +86,11 @@ export const createOrder = async (req, res) => {
           });
         }
 
+        res.json(order);
         // geting the particular product price
         const productId = product?.productId;
 
         const purchesdProduct = await Product.findById({ _id: productId });
-        console.log(purchesdProduct);
 
         // Create the single order for each product
         const singleOrder = {
@@ -98,7 +98,7 @@ export const createOrder = async (req, res) => {
             productId: product?.productId,
             quantity: product?.quantity,
           },
-          totalPrice: purchesdProduct.price * product.quantity,
+          totalPrice: purchesdProduct?.price * product.quantity,
           orderStatus: order?.orderStatus || "pending",
           payment: {
             method: order?.payment?.method,
