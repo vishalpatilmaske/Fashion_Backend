@@ -17,29 +17,6 @@ export const razorpayInstance = new Razorpay({
   key_secret: process.env.RAZORPAY_KEY_SECRET,
 });
 
-// cross origin resource
-// const allowedOrigins = [
-//   "https://fashionflickshop.netlify.app", // Production origin
-//   "http://localhost:5173", // Development origin
-// ];
-
-// app.use(
-//   cors({
-//     origin: function (origin, callback) {
-//       // Allow requests with no origin (like mobile apps or curl requests)
-//       if (!origin) return callback(null, true);
-
-//       // Check if the origin is in the allowed list
-//       if (allowedOrigins.indexOf(origin) !== -1) {
-//         callback(null, true);
-//       } else {
-//         callback(new Error("Not allowed by CORS"));
-//       }
-//     },
-//     credentials: true, // Allow credentials (cookies, etc.)
-//   })
-// );
-
 app.use(
   cors({
     origin: ["https://fashionflickshop.netlify.app", "http://localhost:5173"],
@@ -52,7 +29,7 @@ app.use(cookieParser());
 connectDB();
 
 // Middleware to parse JSON request bodies
-app.use(bodyParser.json());
+app.use(express.json());
 
 // Routes
 app.use("/api/user", userRouter);

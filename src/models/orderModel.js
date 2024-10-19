@@ -14,11 +14,13 @@ const orderSchema = new Schema(
             type: Schema.Types.ObjectId,
             ref: "Product",
             required: true,
+            default: null,
           },
           quantity: {
             type: Number,
             required: true,
             min: [1, "Quantity must be at least 1"],
+            default: 1,
           },
         },
         totalPrice: {

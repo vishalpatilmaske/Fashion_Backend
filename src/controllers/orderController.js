@@ -63,88 +63,6 @@ export const verifyPayment = async (req, res) => {
 };
 
 // create an order
-// export const createOrder = async (req, res) => {
-//   try {
-//     const { userId } = req.params;
-//     const { orders } = req.body;
-
-//     // Check if the user already has an order document
-//     let userOrder = await Order.findOne({ user: userId });
-
-//     // To store the new orders that will be added or created
-//     let newOrders = [];
-
-//     // Loop through each order in the request
-//     for (const order of orders) {
-//       // Loop through each product in the current order's products array
-//       for (const product of order.products) {
-//         // check the prodcutId and the product quantity are present or not
-//         if (!product.productId || !product.quantity) {
-//           return res.status(400).json({
-//             success: false,
-//             message: "Product ID and quantity are required for all products.",
-//           });
-//         }
-
-//         // geting the particular product price
-//         const productId = product?.productId;
-
-//         const purchesdProduct = await Product.findById({ _id: productId });
-
-//         // Create the single order for each product
-//         const singleOrder = {
-//           product: {
-//             productId: product?.productId,
-//             quantity: product?.quantity,
-//           },
-//           totalPrice: purchesdProduct?.price * product?.quantity,
-//           orderStatus: order?.orderStatus || "pending",
-//           payment: {
-//             method: order?.payment?.method,
-//             status: order?.payment?.status,
-//             transactionId: order?.payment?.transactionId,
-//           },
-//           isPaid: order?.isPaid || false,
-//           shippingAddress: order?.shippingAddress,
-//           deliveredAt: order?.deliveredAt || null,
-//           canceledAt: order?.canceledAt || null,
-//         };
-
-//         // If userOrder exists, push the new order to the existing orders array
-//         if (userOrder) {
-//           userOrder.orders.push(singleOrder);
-//         } else {
-//           // Otherwise, add the new single order to newOrders for later creation
-//           newOrders.push(singleOrder);
-//         }
-//       }
-//     }
-//     // If userOrder already exists, save the updated document
-//     if (userOrder) {
-//       await userOrder.save();
-//     } else {
-//       // If no existing order, create a new order document for the user with new orders
-//       userOrder = new Order({
-//         user: userId,
-//         orders: newOrders,
-//       });
-//       await userOrder.save();
-//     }
-
-//     res.status(201).json({
-//       success: true,
-//       message: "Order(s) placed successfully",
-//       order: userOrder,
-//     });
-//   } catch (error) {
-//     res.status(500).json({
-//       success: false,
-//       message: "Error placing order",
-//       error: error.message,
-//     });
-//   }
-// };
-
 export const createOrder = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -189,24 +107,26 @@ export const createOrder = async (req, res) => {
         }
 
         // Create the single order for each product
-        const singleOrder = {
-          product: {
-            productId: productId,
-            quantity: product.quantity,
-          },
-          totalPrice: purchasedProduct.price * product.quantity,
-          orderStatus: order.orderStatus || "pending",
-          payment: {
-            method: order.payment?.method,
-            status: order.payment?.status || "pending",
-            transactionId: order.payment?.transactionId,
-          },
-          isPaid: order.isPaid || false,
-          shippingAddress: order.shippingAddress,
-          deliveredAt: order.deliveredAt || null,
-          canceledAt: order.canceledAt || null,
-        };
-
+        let singleOrder;
+        if (product.quantity) {
+          singleOrder = {
+            product: {
+              productId: productId,
+              quantity: product.quantity,
+            },
+            totalPrice: purchasedProduct.price * product.quantity,
+            orderStatus: order.orderStatus || "pending",
+            payment: {
+              method: order.payment?.method,
+              status: order.payment?.status || "pending",
+              transactionId: order.payment?.transactionId,
+            },
+            isPaid: order.isPaid || false,
+            shippingAddress: order.shippingAddress,
+            deliveredAt: order.deliveredAt || null,
+            canceledAt: order.canceledAt || null,
+          };
+        }
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
           userOrder.orders.push(singleOrder);
@@ -235,7 +155,7 @@ export const createOrder = async (req, res) => {
       order: userOrder,
     });
   } catch (error) {
-    console.error("Error placing order:", error); // Log the full error
+    console.error("Error placing order:", error);
     res.status(500).json({
       success: false,
       message: "Error placing order",
