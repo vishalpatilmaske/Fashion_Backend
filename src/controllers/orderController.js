@@ -63,6 +63,88 @@ export const verifyPayment = async (req, res) => {
 };
 
 // create an order
+// export const createOrder = async (req, res) => {
+//   try {
+//     const { userId } = req.params;
+//     const { orders } = req.body;
+
+//     // Check if the user already has an order document
+//     let userOrder = await Order.findOne({ user: userId });
+
+//     // To store the new orders that will be added or created
+//     let newOrders = [];
+
+//     // Loop through each order in the request
+//     for (const order of orders) {
+//       // Loop through each product in the current order's products array
+//       for (const product of order.products) {
+//         // check the prodcutId and the product quantity are present or not
+//         if (!product.productId || !product.quantity) {
+//           return res.status(400).json({
+//             success: false,
+//             message: "Product ID and quantity are required for all products.",
+//           });
+//         }
+
+//         // geting the particular product price
+//         const productId = product?.productId;
+
+//         const purchesdProduct = await Product.findById({ _id: productId });
+
+//         // Create the single order for each product
+//         const singleOrder = {
+//           product: {
+//             productId: product?.productId,
+//             quantity: product?.quantity,
+//           },
+//           totalPrice: purchesdProduct?.price * product?.quantity,
+//           orderStatus: order?.orderStatus || "pending",
+//           payment: {
+//             method: order?.payment?.method,
+//             status: order?.payment?.status,
+//             transactionId: order?.payment?.transactionId,
+//           },
+//           isPaid: order?.isPaid || false,
+//           shippingAddress: order?.shippingAddress,
+//           deliveredAt: order?.deliveredAt || null,
+//           canceledAt: order?.canceledAt || null,
+//         };
+
+//         // If userOrder exists, push the new order to the existing orders array
+//         if (userOrder) {
+//           userOrder.orders.push(singleOrder);
+//         } else {
+//           // Otherwise, add the new single order to newOrders for later creation
+//           newOrders.push(singleOrder);
+//         }
+//       }
+//     }
+//     // If userOrder already exists, save the updated document
+//     if (userOrder) {
+//       await userOrder.save();
+//     } else {
+//       // If no existing order, create a new order document for the user with new orders
+//       userOrder = new Order({
+//         user: userId,
+//         orders: newOrders,
+//       });
+//       await userOrder.save();
+//     }
+
+//     res.status(201).json({
+//       success: true,
+//       message: "Order(s) placed successfully",
+//       order: userOrder,
+//     });
+//   } catch (error) {
+//     res.status(500).json({
+//       success: false,
+//       message: "Error placing order",
+//       error: error.message,
+//     });
+//   }
+// };
+
 export const createOrder = async (req, res) => {
   try {
     const { userId } = req.params;
@@ -78,7 +160,7 @@ export const createOrder = async (req, res) => {
     for (const order of orders) {
       // Loop through each product in the current order's products array
       for (const product of order.products) {
-        // check the prodcutId and the product quantity are present or not
+        // Validate that both productId and quantity are provided
         if (!product.productId || !product.quantity) {
           return res.status(400).json({
             success: false,
@@ -86,41 +168,55 @@ export const createOrder = async (req, res) => {
           });
         }
 
-        // geting the particular product price
-        const productId = product?.productId;
+        // Check if quantity is a positive number (greater than 0)
+        if (product.quantity <= 0) {
+          return res.status(400).json({
+            success: false,
+            message: "Quantity must be greater than 0.",
+          });
+        }
 
-        const purchesdProduct = await Product.findById({ _id: productId });
-        console.log(purchesdProduct);
+        // Fetch the product details from the database
+        const productId = product.productId;
+        const purchasedProduct = await Product.findById({ _id: productId });
+
+        // If the product does not exist, return an error
+        if (!purchasedProduct) {
+          return res.status(404).json({
+            success: false,
+            message: `Product with ID ${productId} not found.`,
+          });
+        }
 
         // Create the single order for each product
         const singleOrder = {
           product: {
-            productId: product?.productId,
-            quantity: product?.quantity,
+            productId: productId,
+            quantity: product.quantity,
           },
-          totalPrice: purchesdProduct?.price * product?.quantity,
-          orderStatus: order?.orderStatus || "pending",
+          totalPrice: purchasedProduct.price * product.quantity,
+          orderStatus: order.orderStatus || "pending",
           payment: {
-            method: order?.payment?.method,
-            status: order?.payment?.status,
-            transactionId: order?.payment?.transactionId,
+            method: order.payment?.method,
+            status: order.payment?.status || "pending",
+            transactionId: order.payment?.transactionId,
           },
-          isPaid: order?.isPaid || false,
-          shippingAddress: order?.shippingAddress,
-          deliveredAt: order?.deliveredAt || null,
-          canceledAt: order?.canceledAt || null,
+          isPaid: order.isPaid || false,
+          shippingAddress: order.shippingAddress,
+          deliveredAt: order.deliveredAt || null,
+          canceledAt: order.canceledAt || null,
         };
 
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
           userOrder.orders.push(singleOrder);
         } else {
-          console.log("new order");
           // Otherwise, add the new single order to newOrders for later creation
           newOrders.push(singleOrder);
         }
       }
     }
+
     // If userOrder already exists, save the updated document
     if (userOrder) {
       await userOrder.save();
@@ -139,6 +235,7 @@ export const createOrder = async (req, res) => {
       order: userOrder,
     });
   } catch (error) {
+    console.error("Error placing order:", error); // Log the full error
     res.status(500).json({
       success: false,
       message: "Error placing order",
