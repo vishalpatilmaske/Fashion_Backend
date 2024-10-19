@@ -127,13 +127,15 @@ export const createOrder = async (req, res) => {
 
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
-          userOrder.orders.push(singleOrder);
+          const data = userOrder.orders.push(singleOrder);
+          console.log(data);
         } else {
           // Otherwise, add the new single order to newOrders for later creation
           newOrders.push(singleOrder);
         }
       }
     }
+    console.log(userOrder);
 
     // If userOrder already exists, save the updated document
     if (userOrder) {
