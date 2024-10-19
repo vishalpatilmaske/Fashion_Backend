@@ -90,6 +90,7 @@ export const createOrder = async (req, res) => {
         const productId = product?.productId;
 
         const purchesdProduct = await Product.findById({ _id: productId });
+        console.log(purchesdProduct);
 
         // Create the single order for each product
         const singleOrder = {
@@ -112,7 +113,6 @@ export const createOrder = async (req, res) => {
 
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
-          console.log("userOrder");
           userOrder.orders.push(singleOrder);
         } else {
           console.log("new order");
@@ -123,10 +123,8 @@ export const createOrder = async (req, res) => {
     }
     // If userOrder already exists, save the updated document
     if (userOrder) {
-      console.log("new user Order");
       await userOrder.save();
     } else {
-      console.log("user not exist orders");
       // If no existing order, create a new order document for the user with new orders
       userOrder = new Order({
         user: userId,
@@ -141,7 +139,6 @@ export const createOrder = async (req, res) => {
       order: userOrder,
     });
   } catch (error) {
-    console.log("error", error);
     res.status(500).json({
       success: false,
       message: "Error placing order",
