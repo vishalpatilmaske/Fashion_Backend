@@ -86,7 +86,6 @@ export const createOrder = async (req, res) => {
           });
         }
 
-        res.json(product);
         // geting the particular product price
         const productId = product?.productId;
 
@@ -98,7 +97,7 @@ export const createOrder = async (req, res) => {
             productId: product?.productId,
             quantity: product?.quantity,
           },
-          totalPrice: purchesdProduct?.price * product.quantity,
+          totalPrice: purchesdProduct?.price * product?.quantity,
           orderStatus: order?.orderStatus || "pending",
           payment: {
             method: order?.payment?.method,
@@ -110,6 +109,9 @@ export const createOrder = async (req, res) => {
           deliveredAt: order?.deliveredAt || null,
           canceledAt: order?.canceledAt || null,
         };
+
+        res.json(singleOrder);
+        console.log(singleOrder, product.productId);
 
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
