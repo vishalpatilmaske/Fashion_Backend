@@ -87,26 +87,28 @@ export const createOrder = async (req, res) => {
         }
 
         // geting the particular product price
-        const productId = product.productId;
+        const productId = product?.productId;
+
         const purchesdProduct = await Product.findById({ _id: productId });
+        console.log(purchesdProduct);
 
         // Create the single order for each product
         const singleOrder = {
           product: {
-            productId: product.productId,
-            quantity: product.quantity,
+            productId: product?.productId,
+            quantity: product?.quantity,
           },
           totalPrice: purchesdProduct.price * product.quantity,
-          orderStatus: order.orderStatus || "pending",
+          orderStatus: order?.orderStatus || "pending",
           payment: {
-            method: order.payment.method,
-            status: order.payment.status,
-            transactionId: order.payment.transactionId,
+            method: order?.payment?.method,
+            status: order?.payment?.status,
+            transactionId: order?.payment?.transactionId,
           },
-          isPaid: order.isPaid || false,
-          shippingAddress: order.shippingAddress,
-          deliveredAt: order.deliveredAt || null,
-          canceledAt: order.canceledAt || null,
+          isPaid: order?.isPaid || false,
+          shippingAddress: order?.shippingAddress,
+          deliveredAt: order?.deliveredAt || null,
+          canceledAt: order?.canceledAt || null,
         };
 
         // If userOrder exists, push the new order to the existing orders array
