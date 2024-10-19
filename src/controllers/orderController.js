@@ -106,7 +106,6 @@ export const createOrder = async (req, res) => {
           });
         }
 
-        console.log(product);
         // Create the single order for each product
         const singleOrder = {
           product: {
@@ -128,7 +127,6 @@ export const createOrder = async (req, res) => {
 
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
-          console.log(singleOrder.product);
           userOrder.orders.push(singleOrder);
         } else {
           // Otherwise, add the new single order to newOrders for later creation
