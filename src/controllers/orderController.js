@@ -141,7 +141,7 @@ export const createOrder = async (req, res) => {
 
     // If userOrder already exists, save the updated document
     if (userOrder) {
-      console.log("vishal", userOrder);
+      console.log("vishal", userOrder.orders[0]?.products);
       await userOrder.save();
     } else {
       // If no existing order, create a new order document for the user with new orders
