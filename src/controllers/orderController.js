@@ -107,26 +107,24 @@ export const createOrder = async (req, res) => {
         }
 
         // Create the single order for each product
-        let singleOrder;
-        if (product.quantity) {
-          singleOrder = {
-            product: {
-              productId: productId,
-              quantity: product.quantity,
-            },
-            totalPrice: purchasedProduct.price * product.quantity,
-            orderStatus: order.orderStatus || "pending",
-            payment: {
-              method: order.payment?.method,
-              status: order.payment?.status || "pending",
-              transactionId: order.payment?.transactionId,
-            },
-            isPaid: order.isPaid || false,
-            shippingAddress: order.shippingAddress,
-            deliveredAt: order.deliveredAt || null,
-            canceledAt: order.canceledAt || null,
-          };
-        }
+        const singleOrder = {
+          product: {
+            productId: productId,
+            quantity: product.quantity,
+          },
+          totalPrice: purchasedProduct.price * product.quantity,
+          orderStatus: order.orderStatus || "pending",
+          payment: {
+            method: order.payment?.method,
+            status: order.payment?.status || "pending",
+            transactionId: order.payment?.transactionId,
+          },
+          isPaid: order.isPaid || false,
+          shippingAddress: order.shippingAddress,
+          deliveredAt: order.deliveredAt || null,
+          canceledAt: order.canceledAt || null,
+        };
+
         // If userOrder exists, push the new order to the existing orders array
         if (userOrder) {
           userOrder.orders.push(singleOrder);
@@ -155,7 +153,6 @@ export const createOrder = async (req, res) => {
       order: userOrder,
     });
   } catch (error) {
-    console.error("Error placing order:", error);
     res.status(500).json({
       success: false,
       message: "Error placing order",
