@@ -86,7 +86,7 @@ export const createOrder = async (req, res) => {
           });
         }
 
-        res.json(order);
+        res.json(product);
         // geting the particular product price
         const productId = product?.productId;
 
