@@ -12,7 +12,7 @@ import { isAuthenticated, isAdmin } from "../middleware/auth.js";
 
 const router = express.Router();
 
-router.post("/create-product", isAuthenticated, isAdmin, createProduct);
+router.post("/create-product", createProduct);
 router.post("/create-products", isAuthenticated, isAdmin, createProducts);
 router.get("/:id", getSingleProduct);
 router.get("/", getAllProducts);

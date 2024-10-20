@@ -6,6 +6,8 @@ export const createProduct = async (req, res) => {
   try {
     const { name, description, price, image, category, stock } = req.body;
 
+    console.log(name, description, price, image, category, stock);
+
     if (!name || !description || !price || !image || !category || !stock) {
       return handleError(res, 400, "All fields are required");
     }
@@ -19,7 +21,9 @@ export const createProduct = async (req, res) => {
       stock,
     });
     await product.save();
-    res.status(201).json({ success: true, data: product });
+    res
+      .status(201)
+      .json({ success: true, message: "product created successfully!" });
   } catch (error) {
     handleError(res, 500, error.message);
   }
