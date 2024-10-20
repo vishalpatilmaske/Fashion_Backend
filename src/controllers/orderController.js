@@ -265,7 +265,9 @@ export const deleteOrder = async (req, res) => {
     // Save the updated order document
     await userOrders.save();
 
-    res.status(200).json({ message: "Order cancelled successfully" });
+    res
+      .status(200)
+      .json({ message: "Order cancelled successfully", success: true });
   } catch (error) {
     console.error(error);
     return handleError(res, 500, "Server error");
