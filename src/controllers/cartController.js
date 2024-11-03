@@ -32,7 +32,10 @@ export const createCart = async (req, res) => {
 export const getCartByUserId = async (req, res) => {
   try {
     const { cartId } = req.params;
-    const cart = await Cart.findById(cartId);
+    const cart = await Cart.findById(cartId).populate({
+      path: "items.productId",
+      model: "Product",
+    });
     if (!cart) return handleError(res, 404, "Cart not found");
     res.status(200).json(cart);
   } catch (error) {
@@ -117,33 +120,16 @@ export const addSelectedItems = async (req, res) => {
       return res.status(404).json({ message: "Cart not found" });
     }
 
-    // Check if the incoming data is an array of products
+    // Check if the incoming data is an array of products is are then sellect all
     if (Array.isArray(product.productId)) {
-      product.productId.forEach((item) => {
-        // Check if the productId already exists in selectedItems
-        const exists = cart.selectedItems.some(
-          (selectedItem) =>
-            selectedItem.productId.toString() === item.productId.toString()
-        );
-        if (!exists) {
-          cart.selectedItems.push({
-            productId: item.productId,
-            quantity: item.quantity,
-          });
-        }
+      cart.items.map((item) => {
+        item.isSelected = true;
       });
     } else if (product && product.productId) {
-      // For a single product, check if it already exists in selectedItems
-      const exists = cart.selectedItems.some(
-        (selectedItem) =>
-          selectedItem.productId.toString() === product.productId.toString()
+      const item = cart.items.find(
+        (item) => item.productId.toString() === product.productId.toString()
       );
-      if (!exists) {
-        cart.selectedItems.push({
-          productId: product.productId,
-          quantity: product.quantity,
-        });
-      }
+      item.isSelected = true;
     } else {
       return res.status(400).json({ message: "Invalid product data" });
     }
@@ -193,13 +179,16 @@ export const deselectSelectedCartItems = async (req, res) => {
     const cart = await Cart.findById(cartId);
     if (!cart) return handleError(res, 404, "Cart Not Found");
 
-    // Deselect the item in the selectedItems array
+    // Deselect the item
     if (productId) {
-      cart.selectedItems = cart.selectedItems.filter(
-        (product) => product.productId != productId
+      const item = cart.items.find(
+        (item) => item.productId.toString() === productId.toString()
       );
+      item.isSelected = false;
     } else {
-      cart.selectedItems = [];
+      cart.items.map((item) => {
+        item.isSelected = false;
+      });
     }
     // Save the updated cart
     await cart.save();

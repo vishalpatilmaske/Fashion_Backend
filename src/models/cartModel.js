@@ -19,18 +19,10 @@ const cartSchema = new Schema(
           required: true,
           min: 1,
         },
-      },
-    ],
-    selectedItems: [
-      {
-        productId: {
-          type: Schema.Types.ObjectId,
-          ref: "Porduct",
+        isSelected: {
+          type: Boolean,
           required: true,
-        },
-        quantity: {
-          type: Number,
-          min: 1,
+          default: false,
         },
       },
     ],

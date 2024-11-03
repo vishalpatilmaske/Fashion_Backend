@@ -18,15 +18,11 @@ router.get("/:cartId", isAuthenticated, getCartByUserId);
 router.post("/:cartId/add", isAuthenticated, addItemToCart);
 router.patch("/:cartId/remove", isAuthenticated, removeItemFromCart);
 router.delete("/:userId/clear", isAuthenticated, clearCart);
+// change
 router.post(
   "/:cartId/add-selected-cart-items",
   isAuthenticated,
   addSelectedItems
-);
-router.get(
-  "/:cartId/get-selected-cart-items",
-  isAuthenticated,
-  getSelectedCartItems
 );
 router.post(
   "/:cartId/deselect-selected-cart-items",
