@@ -4,6 +4,8 @@ import Order from "../models/orderModel.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import { handleError } from "../utils/handleError.js";
+import sendSignupMail from "../services/sendsignupmail/sendSignupEmail.js";
+import sendSigninMail from "../services/sendsigninmail/sendSigninEmail.js";
 
 // Create User
 export const createUser = async (req, res) => {
@@ -31,6 +33,10 @@ export const createUser = async (req, res) => {
 
     user.refreshToken = refreshToken;
     await user.save();
+
+    if (user) {
+      sendSignupMail(email);
+    }
 
     res.cookie("access_key", accessToken, {
       httpOnly: true,
@@ -71,6 +77,9 @@ export const loginUser = async (req, res) => {
       return handleError(res, 400, "Invalid password");
     }
 
+    if (user) {
+      sendSigninMail(email);
+    }
     // Generate access and refresh tokens
     const payload = { id: user.id, email: user.email, role: user.role };
 

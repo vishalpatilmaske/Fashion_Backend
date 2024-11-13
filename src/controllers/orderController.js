@@ -67,7 +67,7 @@ export const createOrder = async (req, res) => {
   try {
     const { userId } = req.params;
     const { orders } = req.body;
-
+``
     // Check if the user already has an order document
     let userOrder = await Order.findOne({ user: userId });
 
