@@ -105,7 +105,11 @@ export const updateProductDetails = async (req, res) => {
     if (!product) {
       return handleError(res, 404, "Product not found");
     }
-    return res.status(200).json({ success: true, data: product });
+    return res.status(200).json({
+      success: true,
+      data: product,
+      message: "product updated successfully !",
+    });
   } catch (error) {
     handleError(res, 500, error.message);
   }
